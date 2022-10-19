@@ -1,0 +1,5 @@
+ignore_me
+env
+mnt/__pycache__
+mnt/node_modules
+mnt/.env

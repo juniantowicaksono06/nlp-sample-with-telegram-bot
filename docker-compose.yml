@@ -1,0 +1,7 @@
+services:
+  python:
+    container_name: python_container
+    build: .
+    command: nodemon /src/app/main.py
+    volumes:
+      - ./mnt:/src/app
