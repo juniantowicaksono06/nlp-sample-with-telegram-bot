@@ -1,0 +1,27 @@
+[
+	{
+		"tag": "penggunaan_vpn",
+		"responses": ["Berikut ini adalah cara menggunakan VPN", "Berikut kak cara terhubung ke VPN", "Berikut ini adalah langkah-langkah terhubung ke VPN"],
+		"patterns": ["hubung vpn", "menggunakan vpn"]
+	},
+	{
+		"tag": "install_softtoken",
+		"responses": ["Berikut ini adalah cara menginstall Soft Token VPN", "Berikut kak langkah-langkah untuk memasang Soft Token VPN"],
+		"patterns": ["install soft token vpn", "memasang soft token vpn", "soft token", "soft token vpn"]
+	},
+	{
+		"tag": "config_proxy_visa",
+		"responses": ["Berikut ini adalah cara mengatur proxy di VISA", "Berikut kak langkah-langkah untuk mengatur proxy di VISA"],
+		"patterns": ["setting proxy di visa", "setting proxy di fisa", "atur proxy di visa", "atur proxy di fisa"]
+	},
+	{
+		"tag": "penggunaan_visa",
+		"responses": ["Berikut ini adalah cara penggunaan VISA", "Berikut kak cara terhubung ke VISA"],
+		"patterns": ["hubung visa", "menggunakan visa", "fisa"]
+	},
+	{
+		"tag": "compliment",
+		"responses": ["Terima kasih :)", "Terima kasih kak"],
+		"patterns": ["terbaik", "good bot"]
+	}
+]

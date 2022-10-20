@@ -5,6 +5,7 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, RegexHandler, 
 from ml.nltk1 import DitaAjaNLTK
 import requests
 from datetime import datetime, timedelta
+from os import path
 
 NLP = DitaAjaNLTK()
 
@@ -13,8 +14,17 @@ def message(update, context):
     message = update.message.text
     response = NLP.getResponse(message)
     if response == '' or response is None:
-        response = "TES"
-    bot.send_message(text=response, chat_id=update.message.chat.id)
+        return
+    # bot.send_message(text=response, chat_id=update.message.chat.id)
+    tag = response['tag']
+    message = response['response']
+    if path.isfile('./assets/img/{}.jpg'.format(tag)):
+        print(tag)
+        with open('./assets/img/{}.jpg'.format(tag), mode='rb') as file:
+            photo = file.read()
+            bot.send_photo(update.message.chat.id, photo=photo, caption=message)
+    else:
+        bot.send_message(text=message, chat_id=update.message.chat.id)
 
 
 def handler():

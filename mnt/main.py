@@ -5,6 +5,9 @@ from dotenv import load_dotenv
 from list_handler import handler
 load_dotenv()
 
+os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+
+
 class Bot():
     def __init__(self):
         token = os.environ.get('BOT_TOKEN')
