@@ -21,8 +21,11 @@ RUN mkdir -p /setup_ntlk/
 
 COPY ./scripts/main.py /setup_ntlk/main.py
 
-RUN python /setup_ntlk/main.py
 
 RUN npm install -g nodemon
 
 RUN pip install python-dotenv
+
+RUN pip install numpy
+
+RUN python /setup_ntlk/main.py

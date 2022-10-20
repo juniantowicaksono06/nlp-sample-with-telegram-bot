@@ -68,16 +68,19 @@ class DitaAjaNLTK():
             
         ]}
 
-        # print(intents)
+        # print(self.ourData)
         for intent in self.ourData['intents']:
             for pattern in intent["patterns"]:
-                ournewTkns = nltk.word_tokenize(pattern)# tokenize the patterns
+                print(pattern)
+                ournewTkns = nltk.word_tokenize(pattern.lower())# tokenize the patterns
                 self.newWords.extend(ournewTkns)# extends the tokens
-                self.documentX.append(pattern)
+                self.documentX.append(pattern.lower())
                 self.documentY.append(intent["tag"])
             if intent["tag"] not in self.ourClasses:# add unexisting tags to their respective classes
                 self.ourClasses.append(intent["tag"]) 
+        # print(self.newWords)
         self.newWords = [self.lm.lemmatize(word.lower()) for word in self.newWords if word not in string.punctuation] # set words to lowercase if not in punctuation
+        # print(self.newWords)
         self.newWords = sorted(set(self.newWords))# sorting words
         self.ourClasses = sorted(set(self.ourClasses))# sorting classes
 
@@ -121,7 +124,7 @@ class DitaAjaNLTK():
                     metrics=["accuracy"])
         # Output the model in summary
         # Whilst training your Nural Network, you have the option of making the output verbose or simple.
-        self.ourNewModel.fit(x, y, epochs=200, verbose=1)
+        self.ourNewModel.fit(x, y, epochs=100, verbose=1)
         # By epochs, we mean the number of times you repeat a training set.
 
     def ourText(self, text): 
