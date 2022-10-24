@@ -16,8 +16,8 @@ import sys
 
 class DitaAjaNLTK():
     def __init__(self):
-        self.ourClasses = []
-        self.newWords = []
+        self.tagList = []
+        self.patternList = []
         self.documentX = []
         self.documentY = []
         self.model = None
@@ -27,8 +27,8 @@ class DitaAjaNLTK():
     def nltk_init(self):
         self.lm = WordNetLemmatizer() #for getting words
         # lists
-        self.ourClasses = []
-        self.newWords = []
+        self.tagList = []
+        self.patternList = []
         self.documentX = []
         self.documentY = []
 
@@ -37,28 +37,29 @@ class DitaAjaNLTK():
             self.originalFaq = json.load(file)
 
         for intent in self.originalFaq:
-            for pattern in intent["patterns"]:
-                newToken = nltk.word_tokenize(pattern.lower())# tokenize the patterns
-                self.newWords.extend(newToken)# extends the tokens
-                self.documentX.append(pattern.lower())
-                self.documentY.append(intent["tag"])
-            if intent["tag"] not in self.ourClasses:# add unexisting tags to their respective classes
-                self.ourClasses.append(intent["tag"]) 
-        self.newWords = [self.lm.lemmatize(word.lower()) for word in self.newWords if word not in string.punctuation] # set words to lowercase if not in punctuation
-        self.newWords = sorted(set(self.newWords))# sorting words
-        self.ourClasses = sorted(set(self.ourClasses))# sorting classes
+            if "patterns" in intent:
+                for pattern in intent["patterns"]:
+                    newToken = nltk.word_tokenize(pattern.lower())# tokenize the patterns
+                    self.patternList.extend(newToken)# extends the tokens
+                    self.documentX.append(pattern.lower())
+                    self.documentY.append(intent["tag"])
+            if intent["tag"] not in self.tagList:# add unexisting tags to their respective classes
+                self.tagList.append(intent["tag"]) 
+        self.patternList = [self.lm.lemmatize(word.lower()) for word in self.patternList if word not in string.punctuation] # set words to lowercase if not in punctuation
+        self.patternList = sorted(set(self.patternList))# sorting words
+        self.tagList = sorted(set(self.tagList))# sorting classes
 
         dataTraining = [] # training list array
-        outEmpty = [0] * len(self.ourClasses)
+        outEmpty = [0] * len(self.tagList)
         # bow(Bag Of Words) model
         for idx, doc in enumerate(self.documentX):
             bagOfwords = []
             text = self.lm.lemmatize(doc.lower())
-            for word in self.newWords:
+            for word in self.patternList:
                 bagOfwords.append(1) if word in text else bagOfwords.append(0)
 
             outputRow = list(outEmpty)
-            outputRow[self.ourClasses.index(self.documentY[idx])] = 1
+            outputRow[self.tagList.index(self.documentY[idx])] = 1
             dataTraining.append([bagOfwords, outputRow])
 
         random.shuffle(dataTraining)
@@ -92,25 +93,30 @@ class DitaAjaNLTK():
         self.model.fit(x, y, epochs=100, verbose=1)
         # By epochs, we mean the number of times you repeat a training set.
 
-    def ourText(self, text): 
+    def tokenizeWord(self, text): 
         newtkns = nltk.word_tokenize(text)
         newtkns = [self.lm.lemmatize(word) for word in newtkns]
         return newtkns
 
     def wordBag(self, text, vocab): 
-        newtkns = self.ourText(text)
-        bagOwords = [0] * len(vocab)
+        newtkns = self.tokenizeWord(text)
+        bagOfWords = [0] * len(vocab)
         for w in newtkns: 
             for idx, word in enumerate(vocab):
                 if word == w: 
-                    bagOwords[idx] = 1
-        return num.array(bagOwords)
+                    bagOfWords[idx] = 1
+        print(bagOfWords)
+        return num.array(bagOfWords)
 
     def pred_class(self, text, vocab, labels): 
-        bagOwords = self.wordBag(text, vocab)
-        result = self.model.predict(num.array([bagOwords]))[0]
+        bagOfWords = self.wordBag(text, vocab)
+        result = self.model.predict(num.array([bagOfWords]))[0]
+        print("TESTING")
+        print("")
+        print(result)
         threshold = 0.5
         yp = [[idx, res] for idx, res in enumerate(result) if res > threshold]
+
 
         yp.sort(key=lambda x: x[1], reverse=True)
         newList = []
@@ -120,13 +126,11 @@ class DitaAjaNLTK():
 
     def getRes(self, firstlist, fJson): 
         tag = firstlist[0]
-        print(firstlist)
         listOfIntents = fJson
         for i in listOfIntents: 
             if i["tag"] == tag:
                 response = random.choice(i["responses"])
                 break
-        # return ourResult
         return {
             "tag": tag,
             "response": response
@@ -134,6 +138,6 @@ class DitaAjaNLTK():
     
     def getResponse(self, text):
         text = text.lower()
-        intents = self.pred_class(text, self.newWords, self.ourClasses)
+        intents = self.pred_class(text, self.patternList, self.tagList)
         result = self.getRes(intents, self.originalFaq)
         return result
