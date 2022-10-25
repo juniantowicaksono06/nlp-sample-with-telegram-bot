@@ -21,6 +21,8 @@ RUN mkdir -p /setup_ntlk/
 
 COPY ./scripts/main.py /setup_ntlk/main.py
 
+ENV http_proxy="http://22190825:re0_emili4@10.59.82.1:8080"
+ENV https_proxy="http://22190825:re0_emili4@10.59.82.1:8080"
 
 RUN npm install -g nodemon
 
@@ -29,3 +31,5 @@ RUN pip install python-dotenv
 RUN pip install numpy
 
 RUN python /setup_ntlk/main.py
+
+RUN pip install PySastrawi

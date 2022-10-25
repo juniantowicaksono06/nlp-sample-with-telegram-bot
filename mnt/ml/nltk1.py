@@ -62,8 +62,13 @@ class DitaAjaNLTK():
             outputRow[self.tagList.index(self.documentY[idx])] = 1
             dataTraining.append([bagOfwords, outputRow])
 
+        print(dataTraining)
         random.shuffle(dataTraining)
+        print("")
+        print(dataTraining)
+        print("")
         dataTraining = num.array(dataTraining, dtype=object)# coverting our data into an array after shuffling
+        print(dataTraining)
         # print(dataTraining)
 
         x = num.array(list(dataTraining[:, 0]))# first training phase
@@ -111,9 +116,9 @@ class DitaAjaNLTK():
     def pred_class(self, text, vocab, labels): 
         bagOfWords = self.wordBag(text, vocab)
         result = self.model.predict(num.array([bagOfWords]))[0]
-        print("TESTING")
-        print("")
-        print(result)
+        # print("TESTING")
+        # print("")
+        # print(result)
         threshold = 0.5
         yp = [[idx, res] for idx, res in enumerate(result) if res > threshold]
 
