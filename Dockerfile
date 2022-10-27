@@ -32,4 +32,4 @@ RUN pip install numpy
 
 RUN python /setup_ntlk/main.py
 
-RUN pip install PySastrawi
+RUN pip install PySastrawi scikit-learn

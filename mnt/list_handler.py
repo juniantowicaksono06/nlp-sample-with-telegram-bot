@@ -10,6 +10,8 @@ from datetime import datetime, timedelta
 from os import path
 import sys
 from telegram import CallbackQuery, File,InlineKeyboardButton, InlineKeyboardMarkup, ReplyKeyboardRemove, ParseMode
+import telegram
+import base64
 
 # NLP = DitaAjaNLTK()
 
@@ -43,30 +45,58 @@ def messagev2(update, context):
     # bot.send_message(text=result, chat_id=update.message.chat.id)
     if(len(result) > 0):
         for text in result:
-            # print(text , flush=True)
             res = find_desmita_data(text)
             if res == False:
                 continue
-            # print(res['article_title'], flush=True)
             if len(res['article_id']) > 0:
                 if res['article_title'] not in all_data['article_title']:
                     all_data["article_title"].extend(res['article_title'])
                 if res['article_id'] not in all_data['article_id']:
                     all_data["article_id"].extend(res['article_id'])
                     all_data['article_tag'].extend(res['article_tag'])
-        keyboard = generate_btn(all_data)
-        print(keyboard, flush=True)
-        if keyboard != False:
-            bot.send_message(text="Berikut hasil pencarian yang ditemukan", chat_id=update.message.chat.id, reply_markup=keyboard)
-        else:
-            bot.send_message(text="Maaf saya tidak menemukan hasil yang dicari", chat_id=update.message.chat.id)
-    
+        NLP.tensorflow_train(all_data)
+        result = NLP.getResponse(message)
+        if isinstance(result, dict):
+            image = get_image(result['articleID'])
+            bot.send_message(text="Berikut article yang anda cari", chat_id=update.message.chat.id)
+            bot.send_photo(update.message.chat.id, image)
+
+        # keyboard = generate_btn(all_data)
+        # if keyboard != False:
+        #     bot.send_message(text="Berikut hasil pencarian yang ditemukan", chat_id=update.message.chat.id, reply_markup=keyboard)
+        # else:
+        #     bot.send_message(text="Maaf saya tidak menemukan hasil yang dicari", chat_id=update.message.chat.id)
+    else:
+        bot.send_message(text="Maaf saya tidak menemukan hasil yang dicari", chat_id=update.message.chat.id) 
     # print(all_data, flush=True)
     # NLP.tensorflow_train(all_data)
     # text = NLP.getResponse(message)
     # print("HASIL", flush=True)
     # print(text, flush=True)
-    # bot.send_message(text=result, chat_id=update.message.chat.id)
+
+def get_image(article_id):
+    # base64Image = str(result[0]['article_capture_content'])
+    url = "https://desmita.telkomsel.co.id/api"
+    params = {'need': "getArticleImage", 'articleId': article_id}
+    proxies = {"http": "", "https": ""}
+    response = requests.get(url, params=params, timeout=420, proxies=proxies, verify=False)
+    result = response.json()
+    base64Image = str(result[0]['article_capture_content'])
+    if base64Image != None:
+        return base64.b64decode(base64Image)
+        # return image
+    # if base64Image == "None":
+    #     text = msg.getMessage(80)
+    #     app.editMessage(chatid, messageID, text)
+    #     else:
+    #     text = msg.getMessage(81)
+    #     app.editMessage(chatid, messageID, text)
+    #     image = 'article.png'
+    #     with open(image, "wb") as file_image:
+    #         file_image.write(base64Image.decode('base64'))
+    #     app.sendImage(chatid, image)
+    #     text = msg.getMessage(129)
+    #     app.sendMessage(user.chatid, text)
 
 def generate_btn(data):
     if len(data['article_id']) == 0:
@@ -91,7 +121,7 @@ def find_desmita_data(text):
         if(len(result) > 0):
             for article in result:
                 article_id.append(article['article_id'])
-                article_title.append(article['article_title'].lower())
+                article_title.append(article['article_title'].lower().strip())
                 tags = article['article_tag'].lower().split(', ')
                 article_tag.append(tags)
         return {
